@@ -1,0 +1,3 @@
+SELECT naslov,dolzina,ocena FROM film 
+ WHERE dolzina > 100
+ ORDER BY naslov;
