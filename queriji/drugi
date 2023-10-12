@@ -1,0 +1,3 @@
+SELECT *
+FROM film
+WHERE naslov LIKE 'Vojna Zvezd%'

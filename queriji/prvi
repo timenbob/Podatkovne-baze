@@ -1,0 +1,5 @@
+SELECT naslov, ocena, dolzina
+FROM film
+WHERE dolzina BETWEEN 90 and 150
+ORDER BY ocena desc, dolzina
+LIMIT 20
