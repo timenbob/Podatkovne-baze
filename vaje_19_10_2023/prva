@@ -1,0 +1,18 @@
+--Vrnite povprečno oceno filmov iz leta 2019.
+select avg(ocena) from film
+where leto='2019';
+
+--Za vsak ID osebe vrnite število različnih filmov, pri katerih je sodelovala ta oseba (bodisi kot igralec ali režiser). Ne izpisujte imen oseb.
+
+select oseba, count(distinct(film)) as 'stevilo filmov 'from vloga
+group by oseba;
+
+--Vrnite oznake, ki se pojavijo pri vsaj 100 filmih. Prazno oznako (NULL) izpustite.
+
+select oznaka , count(*) from film
+where oznaka is not NULL
+group by oznaka
+having count(*) >=100;
+
+--count ignorira null
+
