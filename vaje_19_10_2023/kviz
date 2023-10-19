@@ -1,0 +1,18 @@
+SELECT * FROM film 
+WHERE ocena >= (
+    SELECT MAX(ocena) FROM film 
+    WHERE leto = 2000 
+);
+
+SELECT * FROM film as l1
+WHERE ocena >= (
+    SELECT MAX(ocena) FROM film as l2
+    WHERE l1.leto = l2.leto
+);
+
+SELECT * FROM film as fm 
+WHERE (
+    SELECT MAX(ocena) FROM film as fm2 
+    WHERE fm.leto = fm2.leto
+) = ocena 
+ORDER BY leto
