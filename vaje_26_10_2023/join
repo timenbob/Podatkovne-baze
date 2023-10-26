@@ -1,0 +1,52 @@
+--stiki
+
+--id glavnega igralca
+select naslov,ime, film, oseba as glavni_igralev from vloga
+    join film 
+        on vloga.film=film.id
+    join oseba
+        on oseba.id=vloga.oseba
+where tip== 'I' and mesto=='1';
+
+
+-- (1)Vrnite naslove filmov in imena glavnih igralcev. Rezultate uredite po imenu igralca in nato še po naslovu filma.
+select naslov, ime
+from film
+    join vloga on film.id=vloga.film--lahko tudi samo id = film ker so razlčno poimenovani
+    join oseba on oseba.id=vloga.oseba
+where tip== 'I' and mesto=='1'
+order by ime,naslov;
+
+-- (2)Za vsakega režiserja (izpišite ga z IDjem in imenom) izpišite skupno dolžino filmov, ki jih je režiral (brez igranja). Rezultate uredite po imenu režiserja.
+select ime, sum(dolzina) from vloga
+    join film 
+        on vloga.film=film.id
+    join oseba
+        on oseba.id=vloga.oseba
+where tip=='R'
+group by oseba,ime
+order by ime;
+
+-- (3)Za vsak žanr (izpišite ga z imenom) izpišite število različnih igralcev in število različnih režiserjev, ki so sodelovali pri filmih tega žanra. 
+--    Rezultate uredite padajoče po vsoti števila igralcev in števila režiserjev (če se nekdo pojavi tako kot igralec kot režiser, se tukaj šteje dvakrat).
+
+select naziv,count(distinct igralci.oseba) as igra,count(distinct reziserji.oseba) as rezira from zanr
+
+    join pripada
+        on zanr.id=pripada.zanr
+        
+     join film
+        on film.id=pripada.film
+        
+    join vloga as igralci
+        on igralci.film=film.id
+        
+    join vloga as reziserji
+        on reziserji.film=film.id
+        
+where igralci.tip=='I' and reziserji.tip=='R'
+group by naziv
+order by igra+rezira desc
+
+
+
