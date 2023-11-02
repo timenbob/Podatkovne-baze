@@ -1,0 +1,31 @@
+--Naredite tabelo ucitelji, ki naj ima stolpce id, ime, priimek in email. Stolpec id naj bo tipa integer, ostali stolpci pa tipa text. Stolpec id naj bo glavni ključ tabele.
+CREATE TABLE ucitelji(
+id integer PRIMARY KEY,
+ime text,
+priimek text,
+email text
+);
+
+--Naredite tabelo predmeti, ki naj vsebuje stolpce id, ime in ects. Stolpca id in ects naj bosta tipa integer, ime predmeta pa text. Spet naj bo stolpec id glavni ključ tabele.
+CREATE TABLE predmeti(
+id integer PRIMARY KEY AUTOINCREMENT,
+ime text,
+ects integer
+);
+
+--V tabeli ucitelji smo pozabili na stolpec kabinet. Tabelam lahko dodajamo stolpce na naslednji način: ALTER TABLE ime_tabele ADD COLUMN ime_stolpca tip_stolpca; Tip stolpca naj bo kar text, saj oznaka kabineta lahko vsebuje tudi piko in črke.
+ALTER TABLE ucitelji ADD COLUMN kabinet text;
+
+--Naredite še šifrant vlog, in sicer kot tabelo vloge, ki ima stolpca id (tipa integer) in opis (tipa text). Poskrbi tudi za glavni ključ. Vloga z id 0 ustreza predavateljem, vloga 1 pa, da gre za asistenta.
+CREATE TABLE vloge(
+id integer PRIMARY KEY,
+opis text
+);
+
+
+--Naredite tabelo izvajalci, ki naj ima tri stolpce (vsi so tipa integer): idpredmeta, iducitelja in vloga. Poskrbi za ustrezne reference na ostale tabele.
+CREATE TABLE izvajalci(
+idpredmeta integer REFERENCES predmeti(id),
+iducitelja integer REFERENCES ucitelji(id),
+vloga integer REFERENCES vloge(id)
+);
