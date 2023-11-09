@@ -1,0 +1,24 @@
+select * from filmi
+where ocena<(select avg(ocena)as avgo from filmi
+group by leto);
+
+select avg(ocena)as avgo from filmi
+group by leto;
+
+
+--dodamo notri
+UPDATE filmi
+SET ocena=ocena+2*(avgo-ocena)
+where ocena<(select avg(ocena)as avgo from filmi
+group by leto);
+
+select * from filmi as fm
+where ocena<(select avg(ocena)as avgo from filmi
+group by leto) and fm.leto = ;
+
+
+SELECT * FROM film fm WHERE (
+    SELECT MAX(ocena) FROM film fm2 
+    WHERE fm.leto = fm2.leto
+) = ocena 
+ORDER BY leto;

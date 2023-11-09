@@ -1,0 +1,79 @@
+--dodamo Ajdo
+INSERT INTO ucitelji
+(ime,priimek,email,kabinet)--da povemo katere stolpce bomo filal v tabeli ucitelji
+VALUES ('Ajda','Lampe','ajda.lampe@uni-lj.si','M427');
+
+select* from ucitelji
+where ime='Ajda';
+
+--Pretnarja naredimo da ni vec profesor podatkovnih baz
+    --poiskali vrtico pravo
+SELECT predmeti.ime,vloga 
+from izvajalci
+    join ucitelji on ucitelji.id=iducitelja
+    join predmeti on predmeti.id=idpredmeta
+where ucitelji.ime='Matija' 
+    and ucitelji.priimek='Pretnar' 
+    and predmeti.ime='Podatkovne baze 1';
+
+--najprej poglej kaj brises in nato brisi
+select * FROM izvajalci
+    join ucitelji on ucitelji.id=iducitelja
+    join predmeti on predmeti.id=idpredmeta
+where ucitelji.ime='Matija' 
+    and ucitelji.priimek='Pretnar' 
+    and predmeti.ime='Podatkovne baze 1';
+
+-- sele zdaj izbrises(pogledas izpise iz uzgori in wala)
+
+select * FROM izvajalci
+where (idpredmeta,iducitelja,vloga)=(select idpredmeta,iducitelja,vloga
+from izvajalci
+    join ucitelji on ucitelji.id=iducitelja
+    join predmeti on predmeti.id=idpredmeta
+where ucitelji.ime='Matija' 
+    and ucitelji.priimek='Pretnar' 
+    and predmeti.ime='Podatkovne baze 1');
+    
+--brisemo
+DELETE FROM izvajalci
+where (idpredmeta,iducitelja,vloga)=(select idpredmeta,iducitelja,vloga
+from izvajalci
+    join ucitelji on ucitelji.id=iducitelja
+    join predmeti on predmeti.id=idpredmeta
+where ucitelji.ime='Matija' 
+    and ucitelji.priimek='Pretnar' 
+    and predmeti.ime='Podatkovne baze 1');
+    
+--dodamo notri
+UPDATE izvajalci
+SET vloga=0
+--where idpredmeta=140 and iducitelja=27897 and vloga=1;
+where (idpredmeta,iducitelja,vloga)=(select idpredmeta,iducitelja,vloga
+from izvajalci
+    join ucitelji on ucitelji.id=iducitelja
+    join predmeti on predmeti.id=idpredmeta
+where predmeti.ime='Podatkovne baze 1'and vloga=1);
+
+--preverimo novo stanje
+select * FROM izvajalci
+    join ucitelji on ucitelji.id=iducitelja
+    join predmeti on predmeti.id=idpredmeta
+where predmeti.ime='Podatkovne baze 1';
+
+
+--Dodamo Ajdo
+Insert into izvajalci --ce ne povemo kateri stolpci morjo bit v ok mvrsten redu
+Values(
+    (select id from predmeti where ime='Podatkovne baze 1'),
+    (select id from ucitelji where ime='Ajda' and priimek='Lampe'),
+    1);
+    
+--preverimo novo stanje
+select * FROM izvajalci
+    join ucitelji on ucitelji.id=iducitelja
+    join predmeti on predmeti.id=idpredmeta
+where predmeti.ime='Podatkovne baze 1';    
+
+
+
