@@ -1,0 +1,21 @@
+CREATE TABLE nagrajenec(
+id integer PRIMARY KEY,
+ime text NOT NULL,
+tip text NOT NULL CHECK (tip in ('oseba','orgarnizacija')),
+datum date,
+drzava text
+);
+
+CREATE TABLE nagrada(
+id integer PRIMARY KEY,
+ime text NOT NULL UNIQUE,
+ustanovitelj date NOT NULL,
+podeljevalec text NOT NULL
+);
+
+CREATE TABLE prejel(
+leto integer,
+id_nagrada integer REFERENCES nagrada(id),
+id_nagrajenec integer REFERENCES nagrajenec(id),
+PRIMARY KEY (id_nagrada, id_nagrajenec, leto)
+);

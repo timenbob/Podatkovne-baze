@@ -1,0 +1,43 @@
+CREATE TABLE oznaka(
+kratica text PRIMARY KEY
+);
+
+CREATE TABLE zanr(
+id integer PRIMARY KEY,
+naziv text NOT NULL
+);
+
+
+CREATE TABLE film(
+id integer PRIMARY KEY,
+naslov text NOT NULL,
+kratica_oznake text REFERENCES oznaka(kratica)
+);
+
+CREATE TABLE oseba(
+id integer PRIMARY KEY,
+ime text NOT NULL
+);
+
+CREATE TABLE vloga(
+tip text,
+mesto text,
+id_film integer REFERENCES film(id),
+id_oseba integer REFERENCES oseba(id),
+PRIMARY KEY (id_film, id_oseba, tip, mesto)
+);
+
+--pripada da poveze gilm in zaner
+
+CREATE TABLE pripada(
+id_film integer REFERENCES film(id),
+id_zaner integer REFERENCES zaner(id),
+PRIMARY KEY (id_film, id_zaner)
+);
+
+
+
+
+
+
+
