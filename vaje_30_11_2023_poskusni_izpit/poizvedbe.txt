@@ -64,25 +64,65 @@ SET smer='PeMa'
 where smer='2PeMa';
 
 -- Izbrišite vse predmete, ki niso dodeljeni nobeni skupini
-select * from predmeti
-join dodelitve on predmeti.id=dodelitve.predmet;
-
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
 -- Za vsak predmet, ki se pojavi tako na prvi kot drugi stopnji
 -- (smer se začne z 1 oz. 2), dodajte nov predmet z istim imenom
--- in smerjo 0Mate (stolpca id ne nastavljajte, ker se bo samodejno
--- določil)
+-- in smerjo 0Mate (stolpca id ne nastavljajte, ker se bo samodejno določil)
+insert into predmeti (ime,smer)
+select ime, '0Mate' from predmeti
+where smer like'1%' or smer like '2%';
 
 -- Za vsako smer izpišite število različnih oseb, ki na njej poučujejo
+select smer, učitelj from predmeti
+join dodelitve on predmeti.id=dodelitve.predmet
+join skupine on dodelitve.skupina=skupine.id
+group by smer;
 
 -- Vrnite pare ID-jev tistih oseb, ki sodelujejo pri vsaj dveh
 -- predmetih (ne glede na tip skupine), pri čemer naj bo prvi ID
 -- v paru manjši od drugega, pari pa naj se ne ponavljajo
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
 
 -- Za vsako osebo (izpišite jo z ID-jem, imenom in priimkom) vrnite
 -- skupno število ur vaj (tako avditornih kot laboratorijskih),
 -- pri čemer naj bo to enako 0, če oseba ne izvaja nobenih vaj
+select osebe.id, osebe.ime, osebe.priimek,sum(case when skupine.tip in('L','V') then skupine.ure else 0 end) as 'skupno_ur' from osebe
+left join skupine on skupine.učitelj=osebe.id
+group by osebe.id, osebe.ime,osebe.priimek;
 
 -- Vrnite ID-je, imena in smeri predmetov, za katere se izvaja
 -- seminar, ne pa tudi avditorne ali laboratorijske vaje
+select predmeti.id, predmeti.ime,predmeti.smer from predmeti
+join dodelitve on dodelitve.predmet=predmeti.id
+join skupine on skupine.id =dodelitve.skupina
+where skupine.tip='S';
+
+
+
+
+
+
+
+
+
+
 
 
