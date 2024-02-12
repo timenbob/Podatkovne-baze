@@ -1,0 +1,125 @@
+-- Vrnite tabelo imen in priimkov vseh oseb, ki jim je ime Matija
+SELECT ime,priimek FROM osebe
+ WHERE ime = 'Matija';
+-- Vrnite tabelo imen in priimkov vseh oseb, urejeno po priimku
+SELECT ime,priimek FROM osebe
+order by priimek;
+-- Vrnite imena vseh predmetov na praktični matematiki (smer: 1PrMa)
+SELECT ime FROM predmeti
+where smer='1PrMa';
+-- Vrnite vse podatke o skupinah z manj kot eno uro
+SELECT * FROM skupine
+where ure<=1;
+-- Vrnite število vseh predmetov na posamezni smeri
+SELECT smer,count(*) FROM predmeti
+group by smer;
+-- Vrnite imena tistih predmetov, ki se pojavljajo na več smereh
+SELECT ime FROM predmeti
+group by ime
+having count(*)>1;
+-- Vrnite imena in vse pripadajoče smeri tistih predmetov, ki se pojavljajo na več smereh
+SELECT ime,smer FROM predmeti
+where ime in(select ime FROM predmeti
+group by ime
+having count(*)>1);
+-- Vrnite skupno število ur vsake osebe
+SELECT ime,priimek, sum(ure) FROM skupine
+join osebe on osebe.id=učitelj
+group by učitelj;
+
+-- Vrnite imena in priimke vseh predavateljev,
+-- torej tistih, ki imajo kakšno skupino tipa P
+SELECT ime,priimek FROM skupine
+inner join osebe on osebe.id=učitelj
+where tip='P';
+-- Vrnite imena in priimke vseh predavateljev,
+-- ki izvajajo tako predavanja (tip P) kot vaje (tipa V ali L)
+SELECT DISTINCT ime,
+                priimek
+  FROM osebe
+       INNER JOIN
+       skupine AS s1 ON osebe.id = s1.učitelj
+       INNER JOIN
+       skupine AS s2 ON osebe.id = s2.učitelj
+ WHERE s1.tip = 'P'
+   AND (s2.tip = 'V' OR s2.tip = 'L');
+-- Vrnite imena in smeri vseh predmetov, ki imajo kakšen seminar
+SELECT ime,smer FROM predmeti
+JOIN dodelitve ON predmeti.id = predmet
+JOIN skupine ON skupine.id = skupina
+WHERE tip = 'S';
+
+-- Vsem predmetom na smeri 2PeMa spremenite smer na PeMa
+SELECT smer FROM predmeti
+WHERE smer = '2PeMa';
+
+UPDATE predmeti
+   SET smer = 'PeMa'
+ WHERE smer = '2PeMa';
+-- Izbrišite vse predmete, ki niso dodeljeni nobeni skupini
+DELETE FROM predmeti
+where id in (
+select id from predmeti
+Left join dodelitve on id=predmet
+where skupina is NULL);
+-- Za vsak predmet, ki se pojavi tako na prvi kot drugi stopnji
+-- (smer se začne z 1 oz. 2), dodajte nov predmet z istim imenom
+-- in smerjo 0Mate (stolpca id ne nastavljajte, ker se bo samodejno
+-- določil)
+INSERT INTO predmeti (ime, smer) 
+SELECT p1.ime, '0Mate'
+  FROM predmeti AS p1
+       INNER JOIN
+       predmeti AS p2 ON p1.ime = p2.ime
+ WHERE p1.smer LIKE '1%' AND p2.smer LIKE '2%';
+-- Za vsako smer izpišite število različnih oseb, ki na njej poučujejo
+SELECT smer, COUNT( DISTINCT učitelj )
+  FROM predmeti
+       JOIN
+       dodelitve ON predmet = predmeti.id
+       JOIN
+       skupine ON skupina = skupine.id
+ GROUP BY smer;
+-- Vrnite pare ID-jev tistih oseb, ki sodelujejo pri vsaj dveh
+-- predmetih (ne glede na tip skupine), pri čemer naj bo prvi ID
+-- v paru manjši od drugega, pari pa naj se ne ponavljajo
+SELECT s1.učitelj, s2.učitelj
+  FROM skupine AS s1
+       JOIN
+       dodelitve AS d1 ON s1.id = d1.skupina
+       JOIN
+       dodelitve AS d2 USING (predmet)
+       JOIN
+       skupine AS s2 ON s2.id = d2.skupina
+ WHERE s1.učitelj < s2.učitelj
+ GROUP BY s1.učitelj, s2.učitelj
+HAVING count( DISTINCT predmet ) >= 2;
+-- Za vsako osebo (izpišite jo z ID-jem, imenom in priimkom) vrnite
+-- skupno število ur vaj (tako avditornih kot laboratorijskih),
+-- pri čemer naj bo to enako 0, če oseba ne izvaja nobenih vaj
+SELECT osebe.id, ime, priimek,
+       coalesce(sum(ure), 0) AS ure
+  FROM osebe
+       LEFT JOIN
+       skupine ON osebe.id = učitelj AND tip IN ('V', 'L')
+GROUP BY osebe.id, ime, priimek;
+
+-- Vrnite ID-je, imena in smeri predmetov, za katere se izvaja
+-- seminar, ne pa tudi avditorne ali laboratorijske vaje
+SELECT id, ime, smer
+  FROM predmeti
+ WHERE id IN (
+          SELECT predmet
+            FROM dodelitve
+                 JOIN
+                 skupine ON skupina = skupine.id
+           WHERE tip = 'S'
+       )
+       AND
+       id NOT IN (
+          SELECT DISTINCT predmet
+            FROM dodelitve
+                 JOIN
+                 skupine ON skupina = skupine.id
+           WHERE tip IN ('V', 'L')
+       );

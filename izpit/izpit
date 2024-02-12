@@ -1,0 +1,95 @@
+-- 1. naloga
+-- a) Izpišite imena in starosti slovenskih kolesarjev
+--    (kratica države: si). Podatke uredite padajoče po starosti.
+SELECT ime,starost
+  FROM kolesar
+ WHERE drzava = 'si';
+
+-- b) Vrnite vse podatke o ekipah, ki imajo v imenu pomišljaj med besedami
+--    (ne znotraj besede). Podatke razvrstite po imenu ekipe.
+SELECT *
+  FROM ekipa
+ WHERE ime like '% - %';
+ 
+-- 2. naloga
+-- a) Za vsako težavnost izpišite skupno dolžino in povprečno višinsko razliko
+--    vseh etap te težavnosti.
+SELECT tezavnost,sum(dolzina),avg(visina)
+  FROM etapa
+group by tezavnost;
+-- b) Za vsako etapo izpišite njeno zaporedno številko
+--    in čas zadnjega kolesarja, ki je prispel na cilj,
+--    v obliki ure:minute:sekunde.
+--    Podatke uredite padajoče po izpisanem času.
+
+select stevilka,strftime('%H:%M:%S', cas, 'unixepoch') from rezultat
+join etapa on etapa.stevilka=rezultat.etapa
+group by stevilka
+having max(cas); 
+
+
+-- 3. naloga
+-- a) Za vsakega kolesarja, ki nastopa za ekipo iz svoje države,
+--    izpišite ime kolesarja, ime ekipe in ime države.
+select kolesar.ime, ekipa.ime, drzava.ime,* from kolesar
+join drzava on drzava.kratica=kolesar.drzava
+join ekipa on kolesar.ekipa=ekipa.id
+where kolesar.drzava=ekipa.drzava;
+-- b) Za vsakega kolesarja, ki je končal dirko
+--    (tj., v nobeni etapi ni odstopil),
+--    izpišite njegovo ime in njegov skupni čas v obliki dni:ure:minute:sekunde.
+--    Podatki naj bodo urejeni naraščajoče po skupnem času.
+select kolesar.ime,strftime('%w:%H:%M:%S', sum(cas), 'unixepoch', '-4 days') as skupni_cas from kolesar
+join rezultat on rezultat.kolesar=kolesar.id
+join etapa on etapa.stevilka=rezultat.etapa
+where kolesar.id in(select kolesar from rezultat
+                    group by kolesar
+                    having count(mesto)=21)
+group by rezultat.kolesar
+order by skupni_cas;
+
+-- 4. naloga
+-- a) Izbrišite vse države, iz katerih ni nobenega kolesarja ali ekipe.
+select kratica, ime from drzava
+where kratica not in (select drzava from kolesar
+                    group by drzava
+                    ) AND kratica not in (select drzava from ekipa
+                    group by drzava
+                    );
+
+DELETE FROM drzava
+WHERE kratica in (select kratica from drzava
+                    where kratica not in (select drzava from kolesar
+                        group by drzava
+                        ) AND kratica not in (select drzava from ekipa
+                        group by drzava
+                        ));
+
+-- b) Za vsakega kolesarja, ki je odstopil, dodajte vnose v tabelo rezultat
+--    s privzetimi vrednostmi v stolpcih mesto, cas, tocke
+--    pri vseh etapah, kjer se ta ni pojavil na štartni listi.
+insert into rezultat
+select id, stevilka, NULL, NULL, 0 from kolesar
+cross join etapa where (id,stevilka) not in (select kolesar, etapa from rezultat);
+
+
+-- 5. naloga
+-- a) Za Tadeja Pogačarja (kolesar.id = 6)
+--    izpišite njegov skupni čas po vsaki etapi
+--    - tj., izpišite številko etape in njegov skupni čas do vključno te etape
+--    v obliki dni:ure:minute:sekunde.
+select rezultat.etapa, strftime('%w:%H:%M:%S', sum(rezultat.cas) over (order by rezultat.etapa), 'unixepoch', '-4 days') as skupen_cas_do_etape from kolesar
+join rezultat on kolesar.id = rezultat.kolesar
+where kolesar.id = 6
+order by rezultat.etapa;
+
+    
+
+-- b) Za vsako etapo najvišje uvrščenemu mlademu kolesarju
+--    (tj., takemu, ki ima najmanjšo vrednost v stolpcu mesto)
+--    prištejte 5 točk pri tej etapi.
+select kolesar.id, kolesar.ime, kolesar.mlad, rezultat.etapa, min(rezultat.mesto) as najvisje_mesto , rezultat.tocke + 5 as plus_tocke from kolesar
+join rezultat on rezultat.kolesar = kolesar.id
+where kolesar.mlad = 1
+group by rezultat.etapa;
+
